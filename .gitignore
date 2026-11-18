@@ -1,0 +1,8 @@
+build/
+*.o
+*.elf
+*.iso
+*.bin
+*.img
+.DS_Store
+Thumbs.db
