@@ -95,6 +95,9 @@ void vga_putc(char c)
 
 void vga_write(const char *s)
 {
+    if (!s) {
+        return;
+    }
     while (*s) {
         vga_putc(*s++);
     }
@@ -121,6 +124,10 @@ static void print_uint(unsigned long value, unsigned base)
 
 void vga_printf(const char *fmt, ...)
 {
+    if (!fmt) {
+        return;
+    }
+
     va_list ap;
     va_start(ap, fmt);
 
@@ -130,6 +137,10 @@ void vga_printf(const char *fmt, ...)
             continue;
         }
         p++;
+        if (*p == '\0') {
+            vga_putc('%');
+            break;
+        }
         switch (*p) {
         case 's': {
             const char *s = va_arg(ap, const char *);
