@@ -4,8 +4,12 @@
 #define COM1 0x3F8
 #define SERIAL_POLL_LIMIT 1000000u
 
+/* Stop retrying a failed UART so screen output and panic handling stay responsive. */
+static int serial_disabled;
+
 void serial_init(void)
 {
+    serial_disabled = 0;
     outb(COM1 + 1, 0x00); /* disable IRQs */
     outb(COM1 + 3, 0x80); /* DLAB */
     outb(COM1 + 0, 0x03); /* 38400 baud divisor lo */
@@ -22,16 +26,23 @@ static int serial_tx_ready(void)
 
 static int serial_wait_tx(void)
 {
+    if (serial_disabled) {
+        return 0;
+    }
     for (unsigned i = 0; i < SERIAL_POLL_LIMIT; ++i) {
         if (serial_tx_ready()) {
             return 1;
         }
     }
+    serial_disabled = 1;
     return 0;
 }
 
 void serial_putc(char c)
 {
+    if (serial_disabled) {
+        return;
+    }
     if (c == '\n' && serial_wait_tx()) {
         outb(COM1, '\r');
     }
