@@ -70,6 +70,7 @@ isr_common:
     movq %rsp, %rdi
     movq %rsp, %r12
     andq $-16, %rsp
+    cld                         /* C code expects the direction flag to be clear. */
     call exception_handler
     movq %r12, %rsp
 
