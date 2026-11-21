@@ -19,7 +19,7 @@ jobs:
             clang lld make qemu-system-x86
 
       - name: Build
-        run: make
+        run: make CC=clang LD=ld.lld
 
       - name: Boot smoke test
-        run: make check
+        run: make CC=clang LD=ld.lld check
