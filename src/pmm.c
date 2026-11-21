@@ -98,7 +98,7 @@ void pmm_init(const void *mbi)
 
     vga_printf("  mmap:    %u usable region(s)\n", regions);
     vga_printf("  pages:   %lu free / %lu total (4 KiB)\n",
-               pmm_free_pages(), pmm_total_pages());
+               pmm_get_free_pages(), pmm_total_pages());
 }
 
 void *pmm_alloc_page(void)
