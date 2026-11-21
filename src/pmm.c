@@ -159,7 +159,7 @@ uint64_t pmm_total_pages(void)
     return total_pages;
 }
 
-uint64_t pmm_free_pages(void)
+uint64_t pmm_get_free_pages(void)
 {
     return total_pages - used_pages;
 }
