@@ -17,14 +17,6 @@ struct idt_ptr {
     uint64_t base;
 } __attribute__((packed));
 
-struct interrupt_frame {
-    uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
-    uint64_t rbp, rdi, rsi, rdx, rcx, rbx, rax;
-    uint64_t vector;
-    uint64_t error;
-    uint64_t rip, cs, rflags, rsp, ss;
-};
-
 extern void isr0(void);  extern void isr1(void);  extern void isr2(void);
 extern void isr3(void);  extern void isr4(void);  extern void isr5(void);
 extern void isr6(void);  extern void isr7(void);  extern void isr8(void);
@@ -40,7 +32,7 @@ extern void isr30(void); extern void isr31(void);
 static struct idt_entry idt[256];
 static struct idt_ptr idtr;
 
-static void set_gate(int vec, void (*handler)(void), uint8_t flags)
+void idt_set_gate(int vec, void (*handler)(void), uint8_t flags)
 {
     uint64_t addr = (uint64_t)(uintptr_t)handler;
     idt[vec].offset_low  = (uint16_t)(addr & 0xFFFF);
@@ -92,7 +84,7 @@ void idt_init(void)
     }
 
     for (int i = 0; i < 32; i++) {
-        set_gate(i, handlers[i], 0x8E); /* present, DPL0, interrupt gate */
+        idt_set_gate(i, handlers[i], 0x8E); /* present, DPL0, interrupt gate */
     }
 
     idtr.limit = sizeof(idt) - 1;

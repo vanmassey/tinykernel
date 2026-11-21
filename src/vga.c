@@ -93,11 +93,21 @@ void vga_putc(char c)
     }
 }
 
-void vga_write(const char *s)
+void vga_backspace(void)
 {
-    if (!s) {
+    if (col > 0) {
+        col--;
+    } else if (row > 0) {
+        row--;
+        col = VGA_WIDTH - 1;
+    } else {
         return;
     }
+    vga[row * VGA_WIDTH + col] = entry(' ', color);
+}
+
+void vga_write(const char *s)
+{
     while (*s) {
         vga_putc(*s++);
     }
@@ -124,10 +134,6 @@ static void print_uint(unsigned long value, unsigned base)
 
 void vga_printf(const char *fmt, ...)
 {
-    if (!fmt) {
-        return;
-    }
-
     va_list ap;
     va_start(ap, fmt);
 
@@ -137,9 +143,16 @@ void vga_printf(const char *fmt, ...)
             continue;
         }
         p++;
-        if (*p == '\0') {
-            vga_putc('%');
-            break;
+        if (*p == 'l') {
+            p++;
+            if (*p == 'x') {
+                print_uint(va_arg(ap, unsigned long), 16);
+                continue;
+            }
+            if (*p == 'u') {
+                print_uint(va_arg(ap, unsigned long), 10);
+                continue;
+            }
         }
         switch (*p) {
         case 's': {

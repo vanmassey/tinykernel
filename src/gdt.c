@@ -14,7 +14,7 @@ struct gdt_ptr {
     uint64_t base;
 } __attribute__((packed));
 
-static struct gdt_entry gdt[3];
+static struct gdt_entry gdt[6];
 static struct gdt_ptr gdtr;
 
 static void set_gate(int idx, uint8_t access, uint8_t gran)
@@ -30,8 +30,11 @@ static void set_gate(int idx, uint8_t access, uint8_t gran)
 void gdt_init(void)
 {
     set_gate(0, 0x00, 0x00); /* null */
-    set_gate(1, 0x9A, 0x20); /* 64-bit code: P, DPL0, exec/read, L=1 */
-    set_gate(2, 0x92, 0x00); /* data: P, DPL0, rw */
+    set_gate(1, 0x9A, 0x20); /* kernel code, L=1 */
+    set_gate(2, 0x92, 0x00); /* kernel data */
+    set_gate(3, 0xFA, 0x20); /* user code for iret, DPL3 */
+    set_gate(4, 0xF2, 0x00); /* user data, DPL3 */
+    set_gate(5, 0xFA, 0x20); /* user code for sysret, DPL3 */
 
     gdtr.limit = sizeof(gdt) - 1;
     gdtr.base  = (uint64_t)(uintptr_t)&gdt;
