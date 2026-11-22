@@ -185,7 +185,7 @@ syscall_entry:
 
     /* Build frame matching interrupt_frame layout (for consistency) */
     pushq $0x23              /* ss (user data selector) */
-    pushq percpu_syscall_rsp(%gs)  /* rsp (user) */
+    pushq %gs:percpu_syscall_rsp  /* rsp (user) */
     pushq %r11               /* rflags (user) */
     pushq $0x1B              /* cs (user code selector | 3) */
     pushq %rcx               /* rip (user) */
