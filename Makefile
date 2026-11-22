@@ -57,11 +57,18 @@ run-debug: $(KERNEL)
 gdb: $(KERNEL)
 	qemu-system-x86_64 -kernel $(KERNEL) -serial stdio -display none -s -S
 
-# Boot headless and assert the kernel reached the init task without panicking.
-check: $(KERNEL)
-	@output=$$(timeout 15 qemu-system-x86_64 -kernel $(KERNEL) \
-		-serial stdio -display none -no-reboot 2>&1); \
-	printf '%s\n' "$$output"; \
+# Build a GRUB ISO for the Multiboot2 kernel.
+iso: $(KERNEL)
+	@mkdir -p iso/boot
+	cp $(KERNEL) iso/boot/tinykernel.elf
+	grub-mkrescue -o $(BUILD)/tinykernel.iso iso
+
+# Boot through GRUB (QEMU -kernel expects Linux/PVH, not Multiboot2).
+# The kernel intentionally halts after init, so timeout is expected.
+check: iso
+	@output=$$(timeout 15 qemu-system-x86_64 -cdrom $(BUILD)/tinykernel.iso \
+		-boot d -serial stdio -display none -no-reboot 2>&1); \
+	printf '%s\\n' "$$output"; \
 	printf '%s' "$$output" | grep -q 'tinykernel' || \
 		{ echo "FAIL: kernel never booted"; exit 1; }; \
 	printf '%s' "$$output" | grep -q 'init' || \
@@ -69,11 +76,6 @@ check: $(KERNEL)
 	if printf '%s' "$$output" | grep -q 'PANIC'; then \
 		echo "FAIL: kernel panicked"; exit 1; fi; \
 	echo "PASS: booted and init task ran"
-
-iso: $(KERNEL)
-	@mkdir -p iso/boot
-	cp $(KERNEL) iso/boot/tinykernel.elf
-	grub-mkrescue -o $(BUILD)/tinykernel.iso iso
 
 clean:
 	rm -rf $(BUILD)

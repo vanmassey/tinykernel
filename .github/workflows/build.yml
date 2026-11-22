@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install toolchain
-        run: sudo apt-get update && sudo apt-get install -y clang lld qemu-system-x86
+        run: sudo apt-get update && sudo apt-get install -y clang lld qemu-system-x86 grub-pc-bin xorriso
       - name: Clean build
         run: make clean && make CC=clang LD=ld.lld OBJCOPY=llvm-objcopy
       - name: Boot test
