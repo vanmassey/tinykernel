@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "io.h"
 #include "kheap.h"
 #include "pmm.h"
 #include "spinlock.h"
