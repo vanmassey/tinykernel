@@ -169,7 +169,7 @@ static void dispatch(char *line)
     }
     if (starts(line, "mem", &rest)) {
         vga_printf("pages free %lu / %lu   heap %u bytes\n",
-                   (unsigned long)pmm_free_pages(),
+                   (unsigned long)pmm_get_free_pages(),
                    (unsigned long)pmm_total_pages(),
                    (unsigned)kheap_used());
         return;

@@ -83,8 +83,8 @@ uint64_t syscall_handler(uint64_t num, uint64_t a0, uint64_t a1, uint64_t a2, ui
     default:
         serial_write("syscall: unknown ");
         /* Simple hex print */
-        char hex[17] = "0x0000000000000000";
-        for (int i = 15; i >= 2; i--) {
+        char hex[19] = "0x0000000000000000";
+        for (int i = 17; i >= 2; i--) {
             uint8_t nibble = num & 0xF;
             hex[i] = nibble < 10 ? '0' + nibble : 'a' + (nibble - 10);
             num >>= 4;

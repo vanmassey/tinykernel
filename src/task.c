@@ -4,7 +4,6 @@
 #include "kernel.h"
 #include "pmm.h"
 #include "pit.h"
-#include "spinlock.h"
 #include "string.h"
 #include "vmm.h"
 #include "vga.h"
@@ -19,7 +18,6 @@ static struct task *ready_head;
 static struct task *ready_tail;
 static uint64_t context_switches;
 static uint32_t next_pid = 1;
-static struct spinlock sched_lock = SPINLOCK_INIT;
 static uint64_t irq_stack_top;
 
 static void enqueue_ready(struct task *t)
@@ -57,7 +55,7 @@ static uint64_t *build_frame(uint64_t *kstack_top, void (*entry)(void *), void *
     uint64_t *sp = kstack_top;
 
     *--sp = 0x10;                       /* ss: kernel data */
-    *--sp = (uint64_t)(uintptr_t)sp;    /* rsp: irrelevant at ring 0 */
+    *--sp = 0;                          /* rsp: unused for ring-0 entry */
     *--sp = 0x202;                      /* rflags: IF=1, bit1 reserved */
     *--sp = 0x08;                       /* cs: kernel code */
     *--sp = (uint64_t)(uintptr_t)entry; /* rip */
@@ -85,7 +83,6 @@ static uint64_t *build_frame(uint64_t *kstack_top, void (*entry)(void *), void *
 
 /* A tiny trampoline stack the boot path switches to before the first
  * task is entered. Each task's own frame lives on its own stack. */
-static uint64_t boot_trampoline[64];
 
 void sched_init(void)
 {
@@ -103,7 +100,6 @@ void sched_init(void)
     /* Set up per-CPU area for syscall entry (GS base).
      * We use the IRQ stack area: first 8 bytes = user RSP save slot,
      * next 8 bytes = kernel RSP load slot. */
-    extern char percpu_syscall_rsp[];
     uint64_t percpu_phys = (uint64_t)(uintptr_t)pmm_alloc_pages(1);
     uint64_t *percpu = (uint64_t *)phys_to_virt(percpu_phys);
     percpu[0] = 0;                    /* user RSP slot */
