@@ -180,8 +180,8 @@ percpu_syscall_rsp:
 syscall_entry:
     /* Swap to kernel stack using per-CPU area (GS base) */
     swapgs
-    movq %rsp, percpu_syscall_rsp(%gs)    /* save user RSP */
-    movq percpu_syscall_rsp+8(%gs), %rsp  /* load kernel RSP */
+    movq %rsp, %gs:percpu_syscall_rsp    /* save user RSP */
+    movq %gs:percpu_syscall_rsp+8, %rsp  /* load kernel RSP */
 
     /* Build frame matching interrupt_frame layout (for consistency) */
     pushq $0x23              /* ss (user data selector) */
