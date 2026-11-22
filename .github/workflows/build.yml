@@ -14,6 +14,6 @@ jobs:
       - name: Install toolchain
         run: sudo apt-get update && sudo apt-get install -y clang lld qemu-system-x86
       - name: Clean build
-        run: make clean && make
+        run: make clean && make CC=clang LD=ld.lld OBJCOPY=llvm-objcopy
       - name: Boot test
-        run: make check
+        run: make check CC=clang LD=ld.lld OBJCOPY=llvm-objcopy
